@@ -19,6 +19,10 @@ void Serial_Init(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);					//将PA9引脚初始化为复用推挽输出
+	// 增加接收引脚初始化
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;        // PA10为USART1_RX
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
 	/*USART初始化*/
 	USART_InitTypeDef USART_InitStructure;					//定义结构体变量
@@ -29,6 +33,15 @@ void Serial_Init(void)
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	//停止位，选择1位
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;		//字长，选择8位
 	USART_Init(USART1, &USART_InitStructure);				//将结构体变量交给USART_Init，配置USART1
+	
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // 使能收发
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // 使能接收中断
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 	
 	/*USART使能*/
 	USART_Cmd(USART1, ENABLE);								//使能USART1，串口开始运行
